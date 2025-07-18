@@ -92,6 +92,8 @@ EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = 'mshuhaib178@gmail.com'         # Your Gmail
 EMAIL_HOST_PASSWORD = 'pukg zouq updq ydnv'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -112,6 +114,11 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKGROUND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

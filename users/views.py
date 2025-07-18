@@ -10,13 +10,12 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.db import DatabaseError
 import logging
-from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode
 from django.urls import reverse
 from django.utils.encoding import force_bytes
-from django.conf import settings
-from django.utils.http import urlsafe_base64_decode
-from django.utils.http import urlsafe_base64_decode
+from .tasks import send_password_reset_email_task
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -124,13 +123,7 @@ class PasswordResetRequestView(APIView):
                 f"If you didn’t request this, ignore this email."
             )
 
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=True
-            )
+            send_password_reset_email_task.delay(subject, message, user.email)
 
             return Response({"message": "Password reset link sent to your email."}, status=status.HTTP_200_OK)
 
