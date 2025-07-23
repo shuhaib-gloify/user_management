@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Books by Author</title>
+    <style>
+        table {
+          border-collapse: collapse;
+          width: 60%;
+          margin-top: 20px;
+        }
+        th, td {
+          border: 1px solid #888;
+          padding: 8px 12px;
+          text-align: left;
+        }
+        th {
+          background-color: #f0f0f0;
+        }
+        h1 {
+          font-family: Arial, sans-serif;
+        }
+        body {
+          font-family: Arial, sans-serif;
+          padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+{% if books %}
+<h1>Books by {{ books.0.author_username }}</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Book Name</th>
+        <th>Published On</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for book in books %}
+    <tr>
+        <td>
+            <a href="{% url 'book-libraries' book.id book.name %}">{{ book.name }}</a>
+        </td>
+        <td>{{ book.published_on }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+<h1>No books found for this author.</h1>
+{% endif %}
+
+
+</body>
+</html>

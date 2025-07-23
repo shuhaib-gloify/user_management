@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Books in {{ library.name }}</title>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 20px;
+        }
+        h1 {
+          font-family: Arial, sans-serif;
+        }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-top: 20px;
+        }
+        th, td {
+          border: 1px solid #888;
+          padding: 8px 12px;
+          text-align: left;
+        }
+        th {
+          background-color: #f0f0f0;
+        }
+        a {
+          color: #007bff;
+          text-decoration: none;
+        }
+        a:hover {
+          text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Books in {{ name }}</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Book Name</th>
+        <th>Author</th>
+        <th>Published On</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for book in books %}
+    <tr>
+        <td>
+            <a href="{% url 'book-libraries' book.id book.name %}">{{ book.name }}</a>
+        </td>
+        <td>
+            <a href="{% url 'author_books' book.author_id %}">{{ book.author }}</a>
+        </td>
+        <td>
+            {{ book.published_on }}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="3">No books found.</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<br>
+</body>
+</html>

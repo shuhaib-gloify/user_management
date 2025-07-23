@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Libraries</title>
+    <style>
+        table {
+          border-collapse: collapse;
+          width: 60%;
+          margin-top: 20px;
+        }
+        th, td {
+          border: 1px solid #888;
+          padding: 8px 12px;
+          text-align: left;
+        }
+        th {
+          background-color: #f0f0f0;
+        }
+        h1 {
+          font-family: Arial, sans-serif;
+        }
+        body {
+          font-family: Arial, sans-serif;
+          padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Libraries</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Library Name</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for lib in libraries %}
+    <tr>
+        <td>{{ lib.name }}</td>
+        <td>
+            <a href="{% url 'library_books' lib.id lib.name %}">View Books</a>
+
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="2">No libraries found.</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

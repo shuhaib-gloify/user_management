@@ -1,24 +1,26 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import RegisterSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
+import logging
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from .utils import send_verification_email
-from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.db import DatabaseError
-import logging
-from django.utils.http import urlsafe_base64_encode
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_encode
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from .models import Library, Book
+from .serializers import LibrarySerializer, BookDetailSerializer, AuthorBooksSerializer
+from .serializers import RegisterSerializer
 from .tasks import send_password_reset_email_task
-
-
+from .utils import send_verification_email
 
 logger = logging.getLogger(__name__)
-
 
 
 class RegisterAPIView(APIView):
@@ -72,8 +74,8 @@ class VerifyEmailView(APIView):
 
         except Exception as e:
             logger.error(f"Unexpected error during email verification: {e}")
-            return Response({"error": "Something went wrong. Please try again later."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            return Response({"error": "Something went wrong. Please try again later."},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class LoginAPIView(APIView):
@@ -101,7 +103,8 @@ class LoginAPIView(APIView):
 
         except Exception as e:
             logger.error(f"Login error: {e}")
-            return Response({"error": "Something went wrong during login."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "Something went wrong during login."},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class PasswordResetRequestView(APIView):
@@ -135,7 +138,6 @@ class PasswordResetRequestView(APIView):
             return Response({"error": "Something went wrong."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class PasswordResetConfirmView(APIView):
     def post(self, request, uidb64, token):
         new_password = request.data.get('password')
@@ -160,7 +162,6 @@ class PasswordResetConfirmView(APIView):
             return Response({"error": "Something went wrong."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class GetAllUsers(APIView):
     def get(self, request):
         users = User.objects.all()
@@ -168,3 +169,52 @@ class GetAllUsers(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class LibraryListAPIView(APIView):
+    def get(self, request):
+        try:
+            libraries = Library.objects.all()
+            serializer = LibrarySerializer(libraries, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.exception(f"Error fetching library list: {e}")
+            return Response({'error': 'An error occurred while retrieving libraries.'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LibraryBooksAPIView(APIView):
+    def get(self, request, pk):
+        try:
+            library = get_object_or_404(Library, pk=pk)
+            books = library.books.all()
+            serializer = BookDetailSerializer(books, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.exception(f"Error fetching books for library ID {pk}: {e}")
+            return Response({'error': 'An error occurred while retrieving books for the library.'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class BookLibrariesAPIView(APIView):
+    def get(self, request, pk):
+        try:
+            book = get_object_or_404(Book, pk=pk)
+            libraries = book.libraries.all()
+            serializer = LibrarySerializer(libraries, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.exception(f"Error fetching libraries for book ID {pk}: {e}")
+            return Response({'error': 'An error occurred while retrieving libraries for the book.'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AuthorBooksAPIView(APIView):
+    def get(self, request, pk):
+        try:
+            author = get_object_or_404(User, pk=pk)
+            books = Book.objects.filter(author=author)
+            serializer = AuthorBooksSerializer(books, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.exception(f"Error fetching books for author ID {pk}: {e}")
+            return Response({'error': 'An error occurred while retrieving books for the author.'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
