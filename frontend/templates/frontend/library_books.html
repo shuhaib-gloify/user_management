@@ -36,6 +36,12 @@
 
 <h1>Books in {{ name }}</h1>
 
+
+{% if request.user.is_staff %}
+  <a href="{% url 'add_book_to_library' library_id %}">Add Book</a>
+{% endif %}
+
+
 <table>
     <thead>
     <tr>

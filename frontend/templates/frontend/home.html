@@ -23,11 +23,29 @@
           font-family: Arial, sans-serif;
           padding: 20px;
         }
+        .action-buttons a {
+          margin-right: 10px;
+        }
     </style>
 </head>
 <body>
 
 <h1>Libraries</h1>
+
+{% if is_admin %}
+<a href="{% url 'add_library' %}">Add New Library</a>
+{% endif %}
+
+{% if request.user.is_staff %}
+<a href="{% url 'add_book' %}">Add Book</a>
+{% endif %}
+
+<form method="post" action="{% url 'logout' %}">
+  {% csrf_token %}
+  <button type="submit">Logout</button>
+</form>
+
+
 
 <table>
     <thead>
@@ -40,9 +58,12 @@
     {% for lib in libraries %}
     <tr>
         <td>{{ lib.name }}</td>
-        <td>
+        <td class="action-buttons">
             <a href="{% url 'library_books' lib.id lib.name %}">View Books</a>
-
+            {% if request.user.is_staff %}
+            <a href="{% url 'delete_library' lib.id %}"
+               onclick="return confirm('Are you sure you want to delete this library?');">Delete</a>
+            {% endif %}
         </td>
     </tr>
     {% empty %}

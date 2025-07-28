@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Library</title>
+
+</head>
+<body>
+<div class="form-box">
+    <h2>Add New Library</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Add Library">
+    </form>
+</div>
+</body>
+</html>
