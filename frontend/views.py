@@ -67,7 +67,6 @@ def add_book_to_library(request, id):
         return redirect('frontend/library_books', library.id, library.name)
     else:
         form = AddBookForm()
-
     return render(request, 'frontend/add_book.html', {'form': form, 'library': library})
 
 

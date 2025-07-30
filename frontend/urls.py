@@ -15,5 +15,5 @@ urlpatterns = [
     path('delete-library/<int:pk>/', views.delete_library, name='delete_library'),
     path('libraries/<int:id>/add-book/', views.add_book_to_library, name='add_book_to_library'),
     path('libraries/<int:pk>/books/<str:name>/', views.library_books, name='frontend/library_books'),
-    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('logout/', LogoutView.as_view(next_page='/accounts/login'), name='logout'),
 ]
