@@ -5,6 +5,8 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('post-login/', views.post_login, name='post_login'),
+    path('verify_otp/', views.verify_otp, name='verify_otp'),
     path('library/<int:pk>/<str:name>/', views.library_books, name='library_books'),
     path('book/<int:pk>/<str:name>/', views.book_libraries, name='book-libraries'),
     path('author/<int:pk>/', views.author_books, name='author_books'),
@@ -16,4 +18,5 @@ urlpatterns = [
     path('libraries/<int:id>/add-book/', views.add_book_to_library, name='add_book_to_library'),
     path('libraries/<int:pk>/books/<str:name>/', views.library_books, name='frontend/library_books'),
     path('logout/', LogoutView.as_view(next_page='/accounts/login'), name='logout'),
+
 ]

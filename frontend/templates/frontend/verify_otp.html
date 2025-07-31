@@ -1,0 +1,11 @@
+<h2>Enter the OTP sent to your email</h2>
+
+<form method="POST">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Verify</button>
+</form>
+
+{% for message in messages %}
+  <p style="color: red;">{{ message }}</p>
+{% endfor %}

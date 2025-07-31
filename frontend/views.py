@@ -3,12 +3,58 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from users.models import Library
-from .forms import LibraryForm, BookForm, AddBookForm
-
+from users.models import Library, OTP
+from .forms import LibraryForm, BookForm, AddBookForm, OTPForm
+from users.utils import send_otp_email, generate_otp
+from django.contrib import messages
+import logging
 
 BASE_API_URL = "http://127.0.0.1:8000"
 
+logger = logging.getLogger(__name__)
+
+
+@login_required
+def post_login(request):
+    try:
+        otp = generate_otp()
+        OTP.objects.create(user=request.user, code=otp)
+        send_otp_email(request.user, otp)
+        logger.info(f"OTP generated and email sent to {request.user.email}")
+        return redirect('verify_otp')
+    except Exception as e:
+        messages.error(request, "Something went wrong while generating or sending OTP.")
+        logger.error(f"Error in post_login for user {request.user.username}: {e}")
+        return redirect('/')
+
+
+@login_required
+def verify_otp(request):
+    try:
+        if request.method == 'POST':
+            form = OTPForm(request.POST)
+            if form.is_valid():
+                code = form.cleaned_data['otp']
+                try:
+                    otp_record = OTP.objects.filter(user=request.user).latest('created_at')
+                    if otp_record.code == code and not otp_record.is_expired():
+                        request.session['otp_verified'] = True
+                        logger.info(f"OTP verified for user {request.user.username}")
+                        return redirect('/')
+                    else:
+                        logger.warning(f"Invalid or expired OTP attempt for user {request.user.username}")
+                except OTP.DoesNotExist:
+                    logger.warning(f"No OTP record found for user {request.user.username}")
+            else:
+                logger.warning(f"Invalid OTP form submission by user {request.user.username}")
+        else:
+            form = OTPForm()
+    except Exception as e:
+        messages.error(request, "An unexpected error occurred while verifying OTP.")
+        logger.error(f"Unexpected error in verify_otp for user {request.user.username}: {e}")
+        form = OTPForm()
+
+    return render(request, 'frontend/verify_otp.html', {'form': form})
 
 @login_required
 def add_library(request):

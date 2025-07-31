@@ -4,11 +4,22 @@ from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-
-from .tasks import send_verification_email_task_to_user
+import random
+from .tasks import send_verification_email_task_to_user, send_otp_email_to_user
 
 logger = logging.getLogger(__name__)
 
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+def send_otp_email(user, otp):
+    subject = "Your OTP Code"
+    message = (
+        f"Hi {user.username},\n\n"
+        f"Your OTP code is: {otp}\n\n"
+        f"This code is valid for 10 minutes.\n"
+    )
+    send_otp_email_to_user.delay(subject, message,user.email)
 
 def send_verification_email(user, request):
     try:

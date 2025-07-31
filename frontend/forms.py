@@ -1,6 +1,8 @@
 from django import forms
 from users.models import Library, Book
 
+class OTPForm(forms.Form):
+    otp = forms.CharField(max_length=6, label="Enter OTP")
 
 class LibraryForm(forms.ModelForm):
     class Meta:
